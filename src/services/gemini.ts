@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
 // 1. 대괄호 표기법을 사용하여 TypeScript의 문법 검사를 완벽하게 우회합니다.
-const apiKey = (import.meta as any)["env"]["VITE_GEMINI_API_KEY"];
+const apiKey = (import.meta as any)["env"]["VITE_GEMINI_API_KEY"];  
 const genAI = new GoogleGenAI(apiKey);
 
 export async function getTarotReading(
