@@ -1,13 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 
-// TypeScript의 엄격한 체크를 피하면서 환경 변수를 안전하게 가져옵니다.
-const getApiKey = () => {
-  const meta = import.meta as any;
-  return meta.env.VITE_GEMINI_API_KEY || "";
-};
-
-const apiKey = getApiKey();
-const ai = new GoogleGenAI(apiKey);
+// 1. TypeScript 에러를 방지하면서 API 키를 안전하게 가져옵니다.
+const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
+const genAI = new GoogleGenAI(apiKey);
 
 export async function getTarotReading(
   name: string,
@@ -15,7 +10,7 @@ export async function getTarotReading(
   birthTime: string,
   calendarType: string,
   category: string,
-  drawnCards: { name: string, isReversed: boolean }[]
+  drawnCards: { name: string; isReversed: boolean }[]
 ) {
   const cardsText = `
 [과거]
@@ -39,12 +34,13 @@ export async function getTarotReading(
 `;
 
   try {
-    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // 2. 모델 설정 부분을 최신 방식에 맞게 수정했습니다.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
     console.error("Gemini API Error:", error);
-    throw error;
+    return "죄송합니다. 우주의 기운을 읽는 도중 오류가 발생했습니다. 다시 시도해주세요.";
   }
 }
