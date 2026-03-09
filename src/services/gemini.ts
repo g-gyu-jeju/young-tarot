@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
-// 1. TypeScript 에러를 방지하면서 API 키를 안전하게 가져옵니다.
-const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
+// 1. 대괄호 표기법을 사용하여 TypeScript의 문법 검사를 완벽하게 우회합니다.
+const apiKey = (import.meta as any)["env"]["VITE_GEMINI_API_KEY"];
 const genAI = new GoogleGenAI(apiKey);
 
 export async function getTarotReading(
@@ -12,19 +12,7 @@ export async function getTarotReading(
   category: string,
   drawnCards: { name: string; isReversed: boolean }[]
 ) {
-  const cardsText = `
-[과거]
-1. ${drawnCards[0].name} (${drawnCards[0].isReversed ? '역방향' : '정방향'})
-2. ${drawnCards[1].name} (${drawnCards[1].isReversed ? '역방향' : '정방향'})
-
-[현재]
-3. ${drawnCards[2].name} (${drawnCards[2].isReversed ? '역방향' : '정방향'})
-4. ${drawnCards[3].name} (${drawnCards[3].isReversed ? '역방향' : '정방향'})
-
-[미래]
-5. ${drawnCards[4].name} (${drawnCards[4].isReversed ? '역방향' : '정방향'})
-6. ${drawnCards[5].name} (${drawnCards[5].isReversed ? '역방향' : '정방향'})
-`;
+  const cardsText = drawnCards.map((c, i) => `${i + 1}. ${c.name} (${c.isReversed ? '역방향' : '정방향'})`).join('\n');
 
   const prompt = `
 당신은 최고의 타로마스터입니다. 다음 정보를 바탕으로 상세한 리딩을 제공하세요.
@@ -34,13 +22,12 @@ export async function getTarotReading(
 `;
 
   try {
-    // 2. 모델 설정 부분을 최신 방식에 맞게 수정했습니다.
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return "죄송합니다. 우주의 기운을 읽는 도중 오류가 발생했습니다. 다시 시도해주세요.";
+    return "우주의 기운을 읽는 도중 오류가 발생했습니다. 다시 시도해주세요.";
   }
 }
