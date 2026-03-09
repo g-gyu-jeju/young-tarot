@@ -1,6 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Vite 환경에 맞게 API 키 호출 방식 수정
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const ai = new GoogleGenAI({ apiKey });
 
 export async function getTarotReading(
   name: string,
@@ -50,11 +52,11 @@ ${cardsText}
 
 주의사항:
 1. 리딩을 시작할 때 뽑은 카드 목록을 다시 나열하지 말고, 바로 [과거], [현재], [미래]에 대한 해석과 조언을 제공해주세요.
-2. 강조하고 싶은 단어는 반드시 \`**단어**\` 형태로 띄어쓰기나 이스케이프 문자(\\) 없이 정확히 작성하세요. 화면에 별표(**) 기호가 그대로 노출되지 않고 깔끔한 볼드체로만 보여야 합니다.
+2. 강조하고 싶은 단어는 반드시 **단어** 형태로 작성하세요.
 `;
 
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-1.5-flash", // 모델명을 안정적인 버전으로 살짝 조정했습니다.
     contents: prompt,
     config: {
       systemInstruction: "당신은 영타로 전문가입니다. 신비롭고 따뜻하며 통찰력 있는 어조로 답변하세요.",
@@ -63,4 +65,3 @@ ${cardsText}
 
   return response.text;
 }
-
