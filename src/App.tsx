@@ -13,8 +13,11 @@ const CATEGORIES = [
   { id: '이직', label: '이직', icon: RefreshCcw },
 ];
 
-// 진짜 라이더 웨이트 타로 카드 이미지 베이스 URL (GitHub에서 가져옴 - 안정적)
-const CARD_IMAGE_BASE_URL = 'https://raw.githubusercontent.com/everestlaw/tarot-images/master/images-light/';
+const TOTAL_DRAW_COUNT = 8;
+
+// Rider-Waite-Smith (RWS) public-domain scans
+// Source: metabismuth/tarot-json (cards are 350x600 JPGs)
+const CARD_IMAGE_BASE_URL = 'https://raw.githubusercontent.com/metabismuth/tarot-json/master/cards/';
 
 export default function App() {
   const [step, setStep] = useState<'form' | 'drawing' | 'loading' | 'result'>('form');
@@ -31,10 +34,22 @@ export default function App() {
   const [availableCards, setAvailableCards] = useState<{name: string, id: string}[]>([]);
   const [isShuffling, setIsShuffling] = useState(false);
 
-  // 카드 이미지 URL 생성 함수 (안정적인 이미지 링크로 교체)
-  const getCardImageUrl = (cardId: string) => {
-    return `${CARD_IMAGE_BASE_URL}${cardId}.jpg`;
-  };
+  const getCardImageUrl = (cardId: string) => {
+    // Our IDs: ar00..ar21, wa01..wa14, cu01..cu14, sw01..sw14, pe01..pe14
+    // Dataset filenames: m00..m21, w01..w14, c01..c14, s01..s14, p01..p14
+    const suitPrefix = cardId.slice(0, 2);
+    const num = cardId.slice(2); // keeps leading 0
+
+    if (suitPrefix === 'ar') {
+      return `${CARD_IMAGE_BASE_URL}m${num}.jpg`;
+    }
+
+    const suitMap: Record<string, string> = { wa: 'w', cu: 'c', sw: 's', pe: 'p' };
+    const suit = suitMap[suitPrefix];
+    if (!suit) return `${CARD_IMAGE_BASE_URL}m00.jpg`;
+
+    return `${CARD_IMAGE_BASE_URL}${suit}${num}.jpg`;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -64,7 +79,7 @@ export default function App() {
   };
 
   const drawCard = () => {
-    if (drawnCards.length >= 6 || availableCards.length === 0) return;
+    if (drawnCards.length >= TOTAL_DRAW_COUNT || availableCards.length === 0) return;
     
     const randomIndex = Math.floor(Math.random() * availableCards.length);
     const card = availableCards[randomIndex];
@@ -110,9 +125,9 @@ export default function App() {
         <motion.div
           animate={{
             background: [
-              'radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 80% 70%, rgba(217, 70, 239, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
+              'radial-gradient(circle at 20% 30%, rgba(20, 184, 166, 0.22) 0%, transparent 55%)',
+              'radial-gradient(circle at 80% 70%, rgba(245, 158, 11, 0.18) 0%, transparent 55%)',
+              'radial-gradient(circle at 20% 30%, rgba(20, 184, 166, 0.22) 0%, transparent 55%)',
             ],
           }}
           transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
@@ -121,9 +136,9 @@ export default function App() {
         <motion.div
           animate={{
             background: [
-              'radial-gradient(circle at 80% 20%, rgba(217, 70, 239, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 80% 20%, rgba(217, 70, 239, 0.3) 0%, transparent 50%)',
+              'radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.18) 0%, transparent 55%)',
+              'radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.18) 0%, transparent 55%)',
+              'radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.18) 0%, transparent 55%)',
             ],
           }}
           transition={{ duration: 15, repeat: Infinity, ease: 'linear', delay: 7.5 }}
@@ -147,7 +162,7 @@ export default function App() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-4xl sm:text-5xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-violet-200 via-fuchsia-200 to-violet-200 mb-4"
+            className="text-4xl sm:text-5xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 mb-4"
           >
             영타로 마스터
           </motion.h1>
@@ -285,7 +300,7 @@ export default function App() {
                 type="submit"
                 className="w-full py-4 rounded-xl font-medium text-lg text-white bg-violet-600 hover:bg-violet-500 transition-all flex items-center justify-center group relative overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.4)]"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-violet-600 animate-rainbow opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 animate-rainbow opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
                   타로 카드 뽑기
@@ -303,7 +318,7 @@ export default function App() {
           >
             <h2 className="text-2xl font-serif text-violet-200 mb-6 relative">
               <Sparkles className="absolute -left-8 top-1 w-5 h-5 text-violet-400 animate-pulse" />
-              {isShuffling ? '카드를 섞는 중...' : `카드를 뽑아주세요 (${drawnCards.length}/6)`}
+              {isShuffling ? '카드를 섞는 중...' : `카드를 뽑아주세요 (${drawnCards.length}/${TOTAL_DRAW_COUNT})`}
               <Sparkles className="absolute -right-8 top-1 w-5 h-5 text-violet-400 animate-pulse" />
             </h2>
             
@@ -328,14 +343,14 @@ export default function App() {
             ) : (
               <div className="flex flex-col items-center w-full">
                 <div className="mb-12 relative w-40 h-60 cursor-pointer group" onClick={drawCard}>
-                  {drawnCards.length < 6 ? (
+                  {drawnCards.length < TOTAL_DRAW_COUNT ? (
                     <motion.div 
                       whileHover={{ y: -10, scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="absolute inset-0 bg-gradient-to-br from-violet-800 to-indigo-900 border-2 border-violet-400/50 rounded-xl shadow-[0_0_30px_rgba(139,92,246,0.3)] flex items-center justify-center group-hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] transition-all"
+                      className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-950 border-2 border-amber-400/40 rounded-xl shadow-[0_0_30px_rgba(245,158,11,0.18)] flex items-center justify-center group-hover:shadow-[0_0_40px_rgba(245,158,11,0.26)] transition-all"
                     >
-                      <div className="w-full h-full border-4 border-transparent border-t-violet-400/30 border-b-violet-400/30 rounded-lg m-2 flex items-center justify-center">
-                        <Moon className="w-12 h-12 text-violet-300/50" />
+                      <div className="w-full h-full border-4 border-transparent border-t-amber-400/20 border-b-amber-400/20 rounded-lg m-2 flex items-center justify-center">
+                        <Moon className="w-12 h-12 text-amber-200/60" />
                       </div>
                     </motion.div>
                   ) : (
@@ -345,14 +360,23 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 sm:gap-6 w-full opacity-90">
-                  {[0, 1, 2, 3, 4, 5].map((index) => {
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 w-full opacity-90">
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((index) => {
                     const card = drawnCards[index];
-                    const position = index < 2 ? '과거' : index < 4 ? '현재' : '미래';
+                    const position =
+                      index < 2
+                        ? `과거 ${index + 1}`
+                        : index < 4
+                          ? `현재 ${index - 1}`
+                          : index === 4
+                            ? '가까운 미래'
+                            : index === 5
+                              ? '다가오는 미래'
+                              : `먼 미래 ${index - 5}`;
                     
                     return (
                       <div key={index} className="flex flex-col items-center">
-                        <span className="text-violet-300/70 text-sm mb-2">{position} {index % 2 + 1}</span>
+                        <span className="text-violet-300/70 text-sm mb-2">{position}</span>
                         <div className="w-full aspect-[2/3] relative perspective-1000">
                           <motion.div
                             initial={false}
@@ -372,13 +396,14 @@ export default function App() {
                             >
                               {card && (
                                 <>
-                                  <img 
-                                    src={getCardImageUrl(card.id)} // 진짜 이미지 URL 사용
+                                  <img 
+                                    src={getCardImageUrl(card.id)}
                                     alt={card.name}
                                     className={`w-full h-full object-cover transition-transform duration-700 ${card.isReversed ? 'rotate-180' : ''}`}
+                                    loading="lazy"
+                                    decoding="async"
                                     referrerPolicy="no-referrer"
                                     onError={(e) => {
-                                      // Fallback to picsum if sacred-texts blocks the image
                                       (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${encodeURIComponent(card.name)}/400/600`;
                                     }}
                                   />
@@ -400,14 +425,14 @@ export default function App() {
                   })}
                 </div>
 
-                {drawnCards.length === 6 && (
+                {drawnCards.length === TOTAL_DRAW_COUNT && (
                   <motion.button
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     onClick={getReading}
                     className="mt-12 px-8 py-4 rounded-xl font-medium text-lg text-white bg-violet-600 hover:bg-violet-500 transition-all flex items-center group relative overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.4)]"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-violet-600 animate-rainbow opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 animate-rainbow opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div className="relative z-10 flex items-center justify-center">
                       <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
                       타로 리딩 보기
@@ -461,7 +486,9 @@ export default function App() {
               {[
                 { title: '과거', cards: [drawnCards[0], drawnCards[1]] },
                 { title: '현재', cards: [drawnCards[2], drawnCards[3]] },
-                { title: '미래', cards: [drawnCards[4], drawnCards[5]] },
+                { title: '미래 1) 가까운 미래(1년 미만)', cards: [drawnCards[4]] },
+                { title: '미래 2) 다가오는 미래(1년~3년)', cards: [drawnCards[5]] },
+                { title: '미래 3) 먼 미래(3년 이상)', cards: [drawnCards[6], drawnCards[7]] },
               ].map((section, idx) => (
                 <div key={idx} className="flex flex-col items-center bg-violet-950/30 p-6 rounded-2xl border border-violet-500/20">
                   <h3 className="text-xl font-serif text-violet-200 mb-6 flex items-center">
@@ -472,10 +499,12 @@ export default function App() {
                   <div className="flex justify-center gap-4 sm:gap-8 w-full">
                     {section.cards.map((card, cardIdx) => card && (
                       <div key={cardIdx} className="relative w-32 h-48 sm:w-40 sm:h-60 rounded-xl overflow-hidden border-2 border-violet-400/50 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
-                        <img 
-                          src={getCardImageUrl(card.id)} // 진짜 이미지 URL 사용
+                        <img 
+                          src={getCardImageUrl(card.id)}
                           alt={card.name}
                           className={`w-full h-full object-cover ${card.isReversed ? 'rotate-180' : ''}`}
+                          loading="lazy"
+                          decoding="async"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${encodeURIComponent(card.name)}/400/600`;
